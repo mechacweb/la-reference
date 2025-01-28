@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { supabase } from "@/integrations/supabase/client";
 import { AuthState, User } from '@/lib/types';
 
 interface AuthStore extends AuthState {
