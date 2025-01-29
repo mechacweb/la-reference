@@ -16,29 +16,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
   login: async (email, password, role) => {
     try {
       set({ isLoading: true });
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          data: {
-            role: role
-          }
-        }
       });
       
       if (error) throw error;
 
-      if (user) {
+      if (authData.user) {
         const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', authData.user.id)
           .single();
 
         if (profileData) {
           const userData = {
-            id: user.id,
-            email: user.email!,
+            id: authData.user.id,
+            email: authData.user.email!,
             name: `${profileData.first_name} ${profileData.last_name}`,
             role: profileData.role,
           };
@@ -63,7 +58,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   signup: async (email, password, firstName, lastName, role) => {
     try {
       set({ isLoading: true });
-      const { data: { user }, error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -77,11 +72,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       if (error) throw error;
 
-      if (user) {
+      if (authData.user) {
         set({
           user: {
-            id: user.id,
-            email: user.email!,
+            id: authData.user.id,
+            email: authData.user.email!,
             name: `${firstName} ${lastName}`,
             role: role as 'admin' | 'commercial' | 'employee',
           },
