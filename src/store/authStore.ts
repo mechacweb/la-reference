@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthState, User } from '@/lib/types';
 
 interface AuthStore extends AuthState {
-  login: (email: string, password: string, role?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   signup: (email: string, password: string, firstName: string, lastName: string, role: string) => Promise<void>;
   logout: () => Promise<void>;
   setLoading: (isLoading: boolean) => void;
@@ -31,17 +31,23 @@ export const useAuthStore = create<AuthStore>((set) => ({
           .single();
 
         if (profileData) {
+          const user = {
+            id: data.user.id,
+            email: data.user.email!,
+            name: `${profileData.first_name} ${profileData.last_name}`,
+            role: profileData.role,
+          };
+          
           set({
-            user: {
-              id: data.user.id,
-              email: data.user.email!,
-              name: `${profileData.first_name} ${profileData.last_name}`,
-              role: profileData.role,
-            },
+            user,
             isAuthenticated: true,
           });
+          
+          return user;
         }
+        throw new Error("Profile not found");
       }
+      throw new Error("User not found");
     } catch (error) {
       console.error('Login error:', error);
       throw error;
