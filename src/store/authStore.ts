@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   login: async (email, password, role) => {
     try {
       set({ isLoading: true });
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email,
         password,
         options: {
@@ -28,27 +28,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
       
       if (error) throw error;
 
-      if (data.user) {
+      if (user) {
         const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', data.user.id)
+          .eq('id', user.id)
           .single();
 
         if (profileData) {
-          const user = {
-            id: data.user.id,
-            email: data.user.email!,
+          const userData = {
+            id: user.id,
+            email: user.email!,
             name: `${profileData.first_name} ${profileData.last_name}`,
             role: profileData.role,
           };
           
           set({
-            user,
+            user: userData,
             isAuthenticated: true,
           });
           
-          return user;
+          return userData;
         }
         throw new Error("Profile not found");
       }
@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   signup: async (email, password, firstName, lastName, role) => {
     try {
       set({ isLoading: true });
-      const { data, error } = await supabase.auth.signUp({
+      const { data: { user }, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -77,11 +77,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       if (error) throw error;
 
-      if (data.user) {
+      if (user) {
         set({
           user: {
-            id: data.user.id,
-            email: data.user.email!,
+            id: user.id,
+            email: user.email!,
             name: `${firstName} ${lastName}`,
             role: role as 'admin' | 'commercial' | 'employee',
           },
