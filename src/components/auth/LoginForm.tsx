@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { ROLES, ROLE_LABELS } from "@/lib/constants";
 import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +13,7 @@ import { Loader2 } from "lucide-react";
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<string>(ROLES.EMPLOYEE);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -30,7 +33,7 @@ export const LoginForm = () => {
 
     setIsLoading(true);
     try {
-      const user = await login(email, password);
+      const user = await login(email, password, role);
       toast({
         title: "Succès",
         description: "Vous êtes connecté",
@@ -38,13 +41,13 @@ export const LoginForm = () => {
       
       // Redirection basée sur le rôle
       switch (user.role) {
-        case 'admin':
+        case ROLES.ADMIN:
           navigate("/admin");
           break;
-        case 'commercial':
+        case ROLES.COMMERCIAL:
           navigate("/commercial");
           break;
-        case 'employee':
+        case ROLES.EMPLOYEE:
           navigate("/employee");
           break;
         default:
@@ -97,6 +100,25 @@ export const LoginForm = () => {
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="role">Rôle</Label>
+            <Select
+              value={role}
+              onValueChange={setRole}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez votre rôle" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (

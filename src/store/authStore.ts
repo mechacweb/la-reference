@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthState, User } from '@/lib/types';
 
 interface AuthStore extends AuthState {
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string, role: string) => Promise<User>;
   signup: (email: string, password: string, firstName: string, lastName: string, role: string) => Promise<void>;
   logout: () => Promise<void>;
   setLoading: (isLoading: boolean) => void;
@@ -13,12 +13,17 @@ export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   isAuthenticated: false,
   isLoading: false,
-  login: async (email, password) => {
+  login: async (email, password, role) => {
     try {
       set({ isLoading: true });
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          data: {
+            role: role
+          }
+        }
       });
       
       if (error) throw error;
