@@ -2,7 +2,7 @@ import { useAuthStore } from "@/store/authStore";
 import { Navigate, Outlet } from "react-router-dom";
 
 export const MainLayout = () => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
 
   if (isLoading) {
     return (
@@ -12,8 +12,18 @@ export const MainLayout = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/" replace />;
+  }
+
+  // Redirection basée sur le rôle si l'utilisateur essaie d'accéder à une route non autorisée
+  const currentPath = window.location.pathname;
+  if (
+    (user.role === 'employee' && !currentPath.startsWith('/employee')) ||
+    (user.role === 'commercial' && !currentPath.startsWith('/commercial')) ||
+    (user.role === 'admin' && !currentPath.startsWith('/admin'))
+  ) {
+    return <Navigate to={`/${user.role}`} replace />;
   }
 
   return (

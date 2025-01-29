@@ -30,12 +30,26 @@ export const LoginForm = () => {
 
     setIsLoading(true);
     try {
-      await login(email, password);
+      const user = await login(email, password);
       toast({
         title: "Succès",
         description: "Vous êtes connecté",
       });
-      navigate("/dashboard");
+      
+      // Redirection basée sur le rôle
+      switch (user.role) {
+        case 'admin':
+          navigate("/admin");
+          break;
+        case 'commercial':
+          navigate("/commercial");
+          break;
+        case 'employee':
+          navigate("/employee");
+          break;
+        default:
+          navigate("/");
+      }
     } catch (error: any) {
       let errorMessage = "Une erreur est survenue";
       if (error.message.includes("Invalid login credentials")) {
@@ -58,7 +72,7 @@ export const LoginForm = () => {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Connexion
+          Connexion CRM
         </CardTitle>
       </CardHeader>
       <CardContent>
