@@ -1,11 +1,18 @@
 import { LoginForm } from "@/components/auth/LoginForm";
-import { SignUpForm } from "@/components/auth/SignUpForm";
-import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants";
-import { useState } from "react";
+import { useAuthStore } from "@/store/authStore";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const [showLogin, setShowLogin] = useState(true);
+  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
@@ -19,22 +26,7 @@ const Index = () => {
           </p>
         </div>
         
-        <div className="flex justify-center space-x-4 mb-6">
-          <Button
-            variant={showLogin ? "default" : "outline"}
-            onClick={() => setShowLogin(true)}
-          >
-            Connexion
-          </Button>
-          <Button
-            variant={!showLogin ? "default" : "outline"}
-            onClick={() => setShowLogin(false)}
-          >
-            Inscription
-          </Button>
-        </div>
-
-        {showLogin ? <LoginForm /> : <SignUpForm />}
+        <LoginForm />
       </div>
     </div>
   );
